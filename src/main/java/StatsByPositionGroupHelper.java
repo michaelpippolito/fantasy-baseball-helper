@@ -1,13 +1,12 @@
 import org.jsoup.nodes.Document;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class StatsByPositionGroupHelper {
 
-    public void getStats(Team team, PositionGroup positionGroup) throws IOException, InterruptedException {
+    public void getStats(Team team, PositionGroup positionGroup) throws Exception {
         System.out.println("Looking up " + positionGroup.getName() + " stats for the " + team.getName() + "...");
 
         switch (positionGroup) {
@@ -38,7 +37,7 @@ public class StatsByPositionGroupHelper {
 
     }
 
-    private void getRotationStats(Team team) throws IOException, InterruptedException {
+    private void getRotationStats(Team team) throws Exception {
         List<String> gameUrls = BaseballReferenceHelper.getAllGameUrls(team);
         Map<String, Player> startingPitchers = getStartingPitcherStats(team, gameUrls);
 
@@ -50,13 +49,16 @@ public class StatsByPositionGroupHelper {
         System.out.printf("The " + team.getName() + " " + PositionGroup.ROTATION.getName() + " have produced %.2f total WAR\n", totalWAR);
     }
 
-    private Map<String, Player> getStartingPitcherStats(Team team, List<String> gameUrls) throws IOException, InterruptedException {
+    private Map<String, Player> getStartingPitcherStats(Team team, List<String> gameUrls) throws Exception {
         Map<String, Player> reliefPitchers = new HashMap<>();
         Map<String, Player> startingPitchers = new HashMap();
 
         // first getting stats for every starter and reliever for every game
         for (String gameUrl : gameUrls) {
             Document gameDocument = BaseballReferenceHelper.getHtmlDocument(gameUrl);
+            String gameInfo = BaseballReferenceHelper.getGameInfo(gameDocument);
+
+            System.out.println("Getting stats for " + gameInfo);
 
             Player startingPitcher = BaseballReferenceHelper.getStartingPitcher(team, gameDocument);
             if (startingPitchers.containsKey(startingPitcher.getName())) {
@@ -73,6 +75,8 @@ public class StatsByPositionGroupHelper {
                     reliefPitchers.put(reliefPitcher.getName(), reliefPitcher);
                 }
             }
+
+            Map<String, Player> infieldersForGame = BaseballReferenceHelper.getInfielders(team, gameDocument);
         }
 
         /*
@@ -83,7 +87,7 @@ public class StatsByPositionGroupHelper {
         for (String pitcher : startingPitchers.keySet()) {
             if (reliefPitchers.containsKey(pitcher)) {
                 System.out.println(pitcher + " has appeared as both a starter and reliever - must calculate WAR manually");
-                startingPitchers.get(pitcher).setWAR(BaseballReferenceHelper.getWARSimple(startingPitchers.get(pitcher)));
+                startingPitchers.get(pitcher).setWAR(BaseballReferenceHelper.calculateBWARPitcher(startingPitchers.get(pitcher)));
             } else {
                 startingPitchers.get(pitcher).setWAR(BaseballReferenceHelper.getWARSimple(startingPitchers.get(pitcher)));
             }

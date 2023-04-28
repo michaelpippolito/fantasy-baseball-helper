@@ -9,7 +9,7 @@ public enum PositionGroup {
     ROTATION("Rotation");
 
     @Getter
-    private String name;
+    private final String name;
 
     public boolean isPitcher() {
         return this.equals(BULLPEN) || this.equals(ROTATION);

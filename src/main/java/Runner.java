@@ -1,7 +1,5 @@
-import java.io.IOException;
-
 public class Runner {
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws Exception {
         StatsByPositionGroupHelper statsByPositionGroupHelper = new StatsByPositionGroupHelper();
 
         Team mikeRotation = Team.HOUSTON_ASTROS;
